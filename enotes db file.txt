@@ -1,0 +1,52 @@
+CREATE TABLE `category` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(50) NOT NULL,
+  `is_active` BIT NOT NULL DEFAULT 0,
+  `is_deleted` BIT NOT NULL DEFAULT 0,
+  `created_by` INT NOT NULL DEFAULT 0,
+  `created_on` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_by` INT NOT NULL DEFAULT 0,
+  `updated_on` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) COLLATE='utf8mb4_0900_ai_ci';
+
+========================================================
+
+create table 'notes' (
+'id' int not null AUTO_INCREMENT,za
+'title' varchar(1000),
+'description' varchar(10000),
+'category_id' int,
+'user_id' int,
+'created_by' int,
+'created_on' TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+'file_id' int null,
+'updated_on' TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+PRIMARY KEY('id') 
+)
+======================================================================
+create table file_details(
+id int not null AUTO_INCREMENT,
+file_name varchar(255),
+original_file_name varchar(255),
+display_file_name varchar(255),
+path varchar(255),
+file_size DOUBLE,
+PRIMARY KEY(id)
+)
+
+describe file_details
+======================================================================
+
+create table todo(
+id int not null AUTO_INCREMENT,
+title varchar(1000),
+description varchar(10000),
+priority int,
+status int,
+created_by int,
+created_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+PRIMARY KEY(id) 
+)
+
+describe todo
