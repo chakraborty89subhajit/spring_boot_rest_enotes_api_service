@@ -50,3 +50,11 @@ PRIMARY KEY(id)
 )
 
 describe todo
+===========================================================================
+alter table category add column description varchar(1000) after name;
+
+ALTER TABLE category MODIFY updated_on TIMESTAMP NULL,  modify updated_by int null;
+
+describe category;
+select * from category;
+
