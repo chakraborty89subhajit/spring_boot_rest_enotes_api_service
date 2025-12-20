@@ -12,6 +12,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -78,7 +79,9 @@ private ModelMapper mapper;
     }
     @Override
     public List<CategoryDTO> getAllCategory() {
-        List<Category> categories = categoryRepository.findAll();
+       // List<Category> categories = categoryRepository.findAll();
+       // List<Category> categories = categoryRepository.findByIsDeletedFalse();
+        List<Category> categories = categoryRepository.findByIsActiveTrueAndIsDeletedFalse();
         List<CategoryDTO> categoryDTOList =
                 categories
                         .stream()
@@ -96,6 +99,35 @@ private ModelMapper mapper;
                 .collect(Collectors.toList());
         return categoryList;
     }
+
+    @Override
+    public CategoryDTO getCategoryById(Integer id) {
+      //  Optional<Category> findByCategory = categoryRepository.findById(id);
+        Optional<Category> findByCategory = categoryRepository.findByIdAndIsDeletedFalse(id);
+        if(findByCategory.isPresent()){
+            Category category = findByCategory.get();
+            return mapper.map(category,CategoryDTO.class);
+        }else{
+            return null;
+        }
+
+    }
+
+    @Override
+    public Boolean deleteCategory(Integer id) {
+        Optional<Category> findByCategory = categoryRepository.findById(id);
+        if(findByCategory.isPresent()){
+            Category category = findByCategory.get();
+            category.setIsDeleted(true);
+            categoryRepository.save(category);
+            return true;
+
+        }else{
+            return false;
+        }
+
+    }
+
 
 
 }
