@@ -64,7 +64,7 @@ private ModelMapper mapper;
     }
   **/
  //=====================by implementing modelmapper====================================
-        Category category = mapper.map(categoryDTO,Category.class);
+       /** Category category = mapper.map(categoryDTO,Category.class);
         category.setIsDeleted(false);
         category.setCreated_by(1);
         category.setCreated_on(new Date());
@@ -76,7 +76,52 @@ private ModelMapper mapper;
             return true;
         }
 
+
     }
+        **/
+       //implementing update in one api
+
+
+
+        Category category = mapper.map(categoryDTO, Category.class);
+
+        // ensure isActive is NOT NULL
+        if (category.getIsActive() == null) {
+            category.setIsActive(true);
+        }
+        // Check if ID exists → update
+        if (category.getId() != null) {
+            category = updateCategory(category); // <-- use updateCategory method
+        } else {
+
+            category.setIsDeleted(false);
+            category.setCreated_by(1);
+            category.setCreated_on(new Date());
+        }
+        Category saveCategory = categoryRepository.save(category);
+
+        return !ObjectUtils.isEmpty(saveCategory);
+        }
+
+
+
+
+
+        //updateCategory
+private Category updateCategory(Category category){
+Optional<Category> findById = categoryRepository.findById(category.getId());
+if(findById.isPresent()){
+    Category existCategory = findById.get();
+    category.setCreated_by(existCategory.getCreated_by());
+    category.setCreated_on(existCategory.getCreated_on());
+    category.setIsDeleted(existCategory.getIsDeleted());
+    category.setUpdated_by(1);
+    category.setUpdatedOn(new Date());
+    return category;
+}
+return category;
+}
+
     @Override
     public List<CategoryDTO> getAllCategory() {
        // List<Category> categories = categoryRepository.findAll();

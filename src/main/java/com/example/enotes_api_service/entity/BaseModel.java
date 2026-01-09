@@ -21,5 +21,5 @@ public class BaseModel {
     private Integer updated_by;
 
     @Column(name = "updated_on")
-    private Integer updatedOn;
+    private Date updatedOn;
 }
