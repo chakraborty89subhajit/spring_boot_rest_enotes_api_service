@@ -3,6 +3,7 @@ package com.example.enotes_api_service.serviceImpl;
 import com.example.enotes_api_service.dto.CategoryDTO;
 import com.example.enotes_api_service.dto.CategoryResponse;
 import com.example.enotes_api_service.entity.Category;
+import com.example.enotes_api_service.exception.ResourceNotFoundException;
 import com.example.enotes_api_service.repo.CategoryRepository;
 import com.example.enotes_api_service.service.CategoryService;
 import org.modelmapper.ModelMapper;
@@ -146,7 +147,10 @@ return category;
     }
 
     @Override
-    public CategoryDTO getCategoryById(Integer id) {
+    public CategoryDTO getCategoryById(Integer id) throws Exception{
+    /**
+
+
       //  Optional<Category> findByCategory = categoryRepository.findById(id);
         Optional<Category> findByCategory = categoryRepository.findByIdAndIsDeletedFalse(id);
         if(findByCategory.isPresent()){
@@ -155,6 +159,20 @@ return category;
         }else{
             return null;
         }
+
+     **/
+     Category category = categoryRepository.findByIdAndIsDeletedFalse(id)
+             .orElseThrow(()->new ResourceNotFoundException("category not found with id : "+id ));
+     if(!ObjectUtils.isEmpty(category)){
+       //  if(category.getName()==null){
+       //      throw new IlligalArgumentException("name is null");
+       //  }
+         return mapper.map(category,CategoryDTO.class);
+
+     }else{
+         return null;
+     }
+
 
     }
 
