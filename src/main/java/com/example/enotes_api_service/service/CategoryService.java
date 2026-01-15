@@ -13,6 +13,7 @@ public interface CategoryService {
     public List<CategoryResponse> getActiveCategory();
     public CategoryDTO getCategoryById(Integer id) throws Exception;
     public Boolean deleteCategory(Integer id);
+    public Boolean saveCategoryValiidation(CategoryDTO categoryDTO);
 
 
 

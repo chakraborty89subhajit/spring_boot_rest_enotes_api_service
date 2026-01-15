@@ -13,6 +13,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @Slf4j
@@ -22,7 +23,7 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
     @PostMapping("/save-category")
-    public ResponseEntity<?> savecategory(@RequestBody CategoryDTO categoryDTO){
+    public ResponseEntity<?> savecategory( @Valid @RequestBody CategoryDTO categoryDTO){
         Boolean saveCategory = categoryService.saveCategory(categoryDTO);
         if(saveCategory){
             return new ResponseEntity<>("category saved successfully",
