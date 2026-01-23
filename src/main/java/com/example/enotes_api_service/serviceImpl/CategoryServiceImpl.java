@@ -99,8 +99,8 @@ private Validation validation;
         } else {
 
             category.setIsDeleted(false);
-            category.setCreated_by(1);
-            category.setCreated_on(new Date());
+            category.setCreated_by(category.getCreated_by());
+            category.setCreated_on(category.getCreated_on());
         }
         Category saveCategory = categoryRepository.save(category);
 
@@ -119,8 +119,8 @@ if(findById.isPresent()){
     category.setCreated_by(existCategory.getCreated_by());
     category.setCreated_on(existCategory.getCreated_on());
     category.setIsDeleted(existCategory.getIsDeleted());
-    category.setUpdated_by(1);
-    category.setUpdatedOn(new Date());
+    category.setUpdated_by(existCategory.getUpdated_by());
+    category.setUpdatedOn(existCategory.getUpdatedOn());
     return category;
 }
 return category;
