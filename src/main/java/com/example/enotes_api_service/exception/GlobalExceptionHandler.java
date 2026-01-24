@@ -62,9 +62,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleInvalidJson(HttpMessageNotReadableException ex) {
         Map<String, Object> error = new LinkedHashMap<>();
         error.put("error", "Invalid JSON");
-        error.put("message", "Check request body syntax");
+       // error.put("message", "Check request body syntax");
+        error.put("message", ex.getMessage());
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
+
+    @ExceptionHandler(ExistDataException.class)
+    public ResponseEntity<?> handleExistDataException(ExistDataException ex) {
+
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+    }
 
 }

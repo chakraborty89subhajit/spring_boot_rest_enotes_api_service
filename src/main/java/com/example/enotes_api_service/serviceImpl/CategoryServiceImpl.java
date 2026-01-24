@@ -3,6 +3,7 @@ package com.example.enotes_api_service.serviceImpl;
 import com.example.enotes_api_service.dto.CategoryDTO;
 import com.example.enotes_api_service.dto.CategoryResponse;
 import com.example.enotes_api_service.entity.Category;
+import com.example.enotes_api_service.exception.ExistDataException;
 import com.example.enotes_api_service.exception.ResourceNotFoundException;
 import com.example.enotes_api_service.repo.CategoryRepository;
 import com.example.enotes_api_service.service.CategoryService;
@@ -85,6 +86,18 @@ private Validation validation;
         **/
        //implementing update in one api
 
+
+        //checking valiadtion
+        validation.categoryValidation(categoryDTO);
+
+        //checking category exist or not
+        Boolean exist = categoryRepository.existsByName(categoryDTO.getName().trim());
+
+        if(exist){
+            //throw error
+
+            throw new ExistDataException("category already exist");
+        }
 
 
         Category category = mapper.map(categoryDTO, Category.class);
