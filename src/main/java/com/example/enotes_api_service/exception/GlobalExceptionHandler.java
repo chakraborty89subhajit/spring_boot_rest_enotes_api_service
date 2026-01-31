@@ -1,5 +1,6 @@
 package com.example.enotes_api_service.exception;
 
+import com.example.enotes_api_service.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +19,18 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<?> handleException(Exception e){
+        log.error("GlobalExceptionHandler::handleException::"+e.getMessage());
+        return CommonUtil.createErrorResponseMessage(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<?> handleNullPointerException(Exception e){
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return CommonUtil.createErrorResponseMessage(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+
+    //    return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 
     }
 
@@ -30,31 +39,36 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleResourceNotFoundException(Exception e){
 
         log.error("globalExceptionHandeler:handleResourceNotFoundException::"+e.getMessage());
-        return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        return CommonUtil.createErrorResponseMessage(e.getMessage(),HttpStatus.NOT_FOUND);
+
+        //return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
     }
 
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException e){
-        List<ObjectError> allErrors = e.getBindingResult()
-                                         .getAllErrors();
-        Map<String,Object> error = new LinkedHashMap<>();
-        allErrors.stream().forEach(
-                er-> {
-                    String msg = er.getDefaultMessage();
-                    String field = ((FieldError) (er)).getField();
-                    error.put(field, msg);
+    public ResponseEntity<?> handleMethodArgumentNotValidException(
+            MethodArgumentNotValidException e) {
 
-                }
+        Map<String, String> errors = new LinkedHashMap<>();
+
+        e.getBindingResult().getFieldErrors().forEach(error ->
+                errors.put(error.getField(), error.getDefaultMessage())
         );
-        return new ResponseEntity<>(error,HttpStatus.BAD_REQUEST);
+
+        return CommonUtil.createErrorResponse(
+                errors,
+                HttpStatus.BAD_REQUEST
+        );
     }
+
 
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<?> handleValidationException(ValidationException ex) {
-        return ResponseEntity
-                .badRequest()
-                .body(ex.getErrors());
+        return CommonUtil.createErrorResponse(ex.getErrors(),HttpStatus.BAD_REQUEST);
+
+      //  return ResponseEntity
+        //        .badRequest()
+          //      .body(ex.getErrors());
     }
 
 
