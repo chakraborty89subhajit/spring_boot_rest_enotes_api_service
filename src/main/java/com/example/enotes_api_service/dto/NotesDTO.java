@@ -15,11 +15,23 @@ import java.util.Date;
 public class NotesDTO {
 
     private Integer id;
-    private String titie;
+
+    private String title;
     private String description;
     private CategoryDTO category;
     private Integer created_by;
     private Date created_on;
     private Integer updated_by;
     private Date update_on;
+
+
+    //creating inner class for clean output
+   @Getter
+   @Setter
+   @NoArgsConstructor
+   @AllArgsConstructor
+    public static class CategoryDTO{
+        private Integer id;
+        private String name;
+    }
 }

@@ -1,7 +1,10 @@
 package com.example.enotes_api_service.serviceImpl;
 
+import com.example.enotes_api_service.dto.CategoryDTO;
 import com.example.enotes_api_service.dto.NotesDTO;
 import com.example.enotes_api_service.entity.Notes;
+import com.example.enotes_api_service.exception.ResourceNotFoundException;
+import com.example.enotes_api_service.repo.CategoryRepository;
 import com.example.enotes_api_service.repo.NotesRepository;
 import com.example.enotes_api_service.service.NotesService;
 import org.modelmapper.ModelMapper;
@@ -19,10 +22,15 @@ public class NotesServiceImpl implements NotesService {
     private NotesRepository notesRepository;
 
     @Autowired
+    private CategoryRepository categoryRepository;
+    @Autowired
     private ModelMapper mapper;
 
     @Override
-    public Boolean saveNotes(NotesDTO notesDTO) {
+    public Boolean saveNotes(NotesDTO notesDTO) throws  Exception {
+
+        //checking valiadtion of category
+        checkCategoryExists(notesDTO.getCategory());
 
         Notes notes = mapper.map(notesDTO,Notes.class);
 
@@ -35,6 +43,11 @@ public class NotesServiceImpl implements NotesService {
         }
 
 
+    }
+
+    private void checkCategoryExists(NotesDTO.CategoryDTO categoryDTO) throws Exception{
+        categoryRepository.findById(categoryDTO.getId())
+                .orElseThrow(()->new ResourceNotFoundException("category id is Invalid"));
     }
 
     @Override

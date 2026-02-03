@@ -19,7 +19,7 @@ public class NotesController {
     private NotesService notesService;
 
     @PostMapping("/save-notes")
-    public ResponseEntity<?> saveNotes (@RequestBody NotesDTO notesDTO){
+    public ResponseEntity<?> saveNotes (@RequestBody NotesDTO notesDTO) throws Exception {
         Boolean saveNotes = notesService.saveNotes(notesDTO);
 
         if(saveNotes){
@@ -42,6 +42,8 @@ public class NotesController {
           return CommonUtil.createBuildResponse(notes,HttpStatus.OK);
         }
     }
+
+
 
 
 }
