@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -78,7 +79,7 @@ public class NotesServiceImpl implements NotesService {
 
 
     private FileDetails saveFileDetails(MultipartFile file) throws IOException {
-        if (!file.isEmpty()) {
+        if (!ObjectUtils.isEmpty(file) && !file.isEmpty()) {
             FileDetails fileDetails = new FileDetails();
             String originalFileName = file.getOriginalFilename();
             fileDetails.setOriginalFileName(originalFileName);
@@ -87,6 +88,14 @@ public class NotesServiceImpl implements NotesService {
             //generate any random string
             String rndString = UUID.randomUUID().toString();
             String extension = FilenameUtils.getExtension(originalFileName);
+            //allowing only specific type of file to database
+            List<String> extensionAllowed = Arrays.asList("pdf","xlsx","jpg","docx");
+
+            if(!extensionAllowed.contains(extension) ){
+                throw new IOException("invalid file format allow only pdf, xlsx, jpg,docx");
+
+            }
+
             String uploadFileName = rndString + "." + extension;
             fileDetails.setUploadedFileName(uploadFileName);
             fileDetails.setFileSize(file.getSize());
