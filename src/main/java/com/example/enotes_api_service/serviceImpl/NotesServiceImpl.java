@@ -16,10 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -87,7 +90,9 @@ public class NotesServiceImpl implements NotesService {
 
             //generate any random string
             String rndString = UUID.randomUUID().toString();
-            String extension = FilenameUtils.getExtension(originalFileName);
+            //String extension = FilenameUtils.getExtension(originalFileName);
+            String extension = FilenameUtils.getExtension(originalFileName).toLowerCase();
+
             //allowing only specific type of file to database
             List<String> extensionAllowed = Arrays.asList("pdf","xlsx","jpg","docx");
 
@@ -150,4 +155,24 @@ public class NotesServiceImpl implements NotesService {
                 .map(note -> mapper.map(note, NotesDTO.class))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public byte[] downloadFile(FileDetails fileDetails) throws Exception {
+
+
+        InputStream io = new FileInputStream(fileDetails.getPath());
+        byte[] byteData = StreamUtils.copyToByteArray(io);
+        return byteData;
+    }
+
+    @Override
+    public FileDetails getFileDetails(Integer id) throws Exception {
+        FileDetails fileDetails = fileRepository.findById(id)
+                .orElseThrow(()->new ResourceNotFoundException("file not available"));
+        return fileDetails;
+    }
+
+
+
 }
+

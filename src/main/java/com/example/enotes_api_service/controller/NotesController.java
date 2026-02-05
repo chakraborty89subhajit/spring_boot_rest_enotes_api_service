@@ -1,15 +1,20 @@
 package com.example.enotes_api_service.controller;
 
 import com.example.enotes_api_service.dto.NotesDTO;
+import com.example.enotes_api_service.entity.FileDetails;
 import com.example.enotes_api_service.service.NotesService;
 import com.example.enotes_api_service.util.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -44,6 +49,27 @@ public class NotesController {
         }else{
           return CommonUtil.createBuildResponse(notes,HttpStatus.OK);
         }
+    }
+
+    //implementing dowlod files with notes
+    @GetMapping("/download/{id}")
+    public ResponseEntity<?> downloadFile(@PathVariable Integer id) throws Exception{
+
+        FileDetails fileDetails = notesService.getFileDetails(id);
+        byte[] data = notesService.downloadFile(fileDetails);
+        HttpHeaders headers = new HttpHeaders();
+        //String contentType = CommonUtil.getContentType(fileDetails.getOriginalFileName());
+        String contentType = Files.probeContentType(Paths.get(fileDetails.getPath()));
+
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+
+        headers.setContentType(MediaType.parseMediaType(contentType));
+        headers.setContentDispositionFormData("attachment",fileDetails.getOriginalFileName());
+
+
+        return ResponseEntity.ok().headers(headers).body(data);
     }
 
 
