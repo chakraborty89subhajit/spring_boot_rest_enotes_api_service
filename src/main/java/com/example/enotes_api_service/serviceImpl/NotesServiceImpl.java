@@ -2,6 +2,7 @@ package com.example.enotes_api_service.serviceImpl;
 
 import com.example.enotes_api_service.dto.CategoryDTO;
 import com.example.enotes_api_service.dto.NotesDTO;
+import com.example.enotes_api_service.dto.NotesResponse;
 import com.example.enotes_api_service.entity.FileDetails;
 import com.example.enotes_api_service.entity.Notes;
 import com.example.enotes_api_service.exception.ResourceNotFoundException;
@@ -10,10 +11,14 @@ import com.example.enotes_api_service.repo.FileRepository;
 import com.example.enotes_api_service.repo.NotesRepository;
 import com.example.enotes_api_service.service.NotesService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.catalina.mapper.Mapper;
 import org.apache.commons.io.FilenameUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StreamUtils;
@@ -172,6 +177,27 @@ public class NotesServiceImpl implements NotesService {
         return fileDetails;
     }
 
+    @Override
+    public NotesResponse getAllNotesByUser(Integer userId,Integer pageNo,Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNo,pageSize);
+        Page<Notes> pageNotes = notesRepository.findByCreatedByUser(userId,pageable);
+        List<NotesDTO> notesDTO = pageNotes
+                .get()
+                .map(n->mapper.map(n,NotesDTO.class))
+                .collect(Collectors.toList());
+
+        NotesResponse notes = NotesResponse.builder()
+                .notes(notesDTO)
+                .pageNo(pageNotes.getNumber())
+                .pageSize(pageNotes.getSize())
+                .totalElements(pageNotes.getTotalElements())
+                .totalPages(pageNotes.getTotalPages())
+                .isFirst(pageNotes.isFirst())
+                .isLast(pageNotes.isLast())
+                .build();
+
+        return notes;
+    }
 
 
 }
