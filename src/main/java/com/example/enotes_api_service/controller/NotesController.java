@@ -3,6 +3,7 @@ package com.example.enotes_api_service.controller;
 import com.example.enotes_api_service.dto.NotesDTO;
 import com.example.enotes_api_service.dto.NotesResponse;
 import com.example.enotes_api_service.entity.FileDetails;
+import com.example.enotes_api_service.entity.Notes;
 import com.example.enotes_api_service.service.NotesService;
 import com.example.enotes_api_service.util.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +86,31 @@ public class NotesController {
         return CommonUtil.createBuildResponse(notes,HttpStatus.OK);
     }
 
+//creating soft delete notes api
+@GetMapping("/delete/{id}")
+    public ResponseEntity<?> deleteNots(@PathVariable Integer id) throws Exception{
+        notesService.softDeleteNotes(id);
+return CommonUtil.createBuildResponseMessage("delete success",HttpStatus.OK) ;
+    }
 
+    //creating notes restore api
+    @GetMapping("/restore/{id}")
+    public ResponseEntity<?> restoreNotes(@PathVariable Integer id) throws Exception{
+        notesService.restoreNote(id);
+        return CommonUtil.createBuildResponseMessage("note restore successfully",HttpStatus.OK);
+        }
+
+        //creating a recycle bin and place all the deleted files in the recycle bin
+
+    @GetMapping("/recycle-bin")
+    public ResponseEntity<?> getUserRecycleBinNotes() throws Exception{
+        Integer userId= 2;
+        List<NotesDTO> notes = notesService.getUserRecycleBinNotes(userId);
+        if( CollectionUtils.isEmpty(notes)){
+            return CommonUtil.createBuildResponseMessage
+                    ("notes not present in recycle bin",HttpStatus.OK);
+        }
+        return CommonUtil.createErrorResponse(notes,HttpStatus.OK);
+    }
 
 }

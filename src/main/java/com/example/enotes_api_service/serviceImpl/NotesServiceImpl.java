@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -215,6 +216,36 @@ public class NotesServiceImpl implements NotesService {
                 .build();
 
         return notes;
+    }
+
+    @Override
+    public void softDeleteNotes(Integer id) throws Exception {
+        Notes notes = notesRepository.findById(id).orElseThrow(()->
+                new ResourceNotFoundException("notes id invalid"));
+        notes.setIsDeleted(true);
+        notes.setDeleteOn(new Date());
+        notesRepository.save(notes);
+    }
+
+    @Override
+    public void restoreNote(Integer id) throws Exception {
+        Notes notes = notesRepository.findById(id).orElseThrow(()->
+                new ResourceNotFoundException("notes with id : "+id+" can not be restored")
+                );
+        notes.setIsDeleted(false);
+        notes.setDeleteOn(null);
+        notesRepository.save(notes);
+    }
+
+    @Override
+    public List<NotesDTO> getUserRecycleBinNotes(Integer userId) {
+        List<Notes> recycleNotes = notesRepository.findDeletedNotesByUser(userId);
+        List<NotesDTO> notesDTOList = recycleNotes
+                .stream()
+                .map(
+                note->mapper.map(note, NotesDTO.class))
+                .collect(Collectors.toList());
+        return notesDTOList;
     }
 
 
