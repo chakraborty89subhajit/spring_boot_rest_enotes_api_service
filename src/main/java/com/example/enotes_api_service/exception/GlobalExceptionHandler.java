@@ -5,47 +5,29 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.io.FileNotFoundException;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleException(Exception e){
-        log.error("GlobalExceptionHandler::handleException::"+e.getMessage());
-        return CommonUtil.createErrorResponseMessage(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-
-    @ExceptionHandler(NullPointerException.class)
-    public ResponseEntity<?> handleNullPointerException(Exception e){
-        return CommonUtil.createErrorResponseMessage(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
-
-    //    return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-
-    }
-
-
+    // 🔹 Resource Not Found (404)
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<?> handleResourceNotFoundException(Exception e){
-
-        log.error("globalExceptionHandeler:handleResourceNotFoundException::"+e.getMessage());
-        return CommonUtil.createErrorResponseMessage(e.getMessage(),HttpStatus.NOT_FOUND);
-
-        //return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException e){
+        log.error("ResourceNotFoundException :: {}", e.getMessage());
+        return CommonUtil.createErrorResponseMessage(
+                e.getMessage(),
+                HttpStatus.NOT_FOUND
+        );
     }
 
-
+    // 🔹 Validation Errors (400)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException e) {
@@ -62,36 +44,51 @@ public class GlobalExceptionHandler {
         );
     }
 
-
+    // 🔹 Custom Validation Exception (400)
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<?> handleValidationException(ValidationException ex) {
-        return CommonUtil.createErrorResponse(ex.getErrors(),HttpStatus.BAD_REQUEST);
-
-      //  return ResponseEntity
-        //        .badRequest()
-          //      .body(ex.getErrors());
+        return CommonUtil.createErrorResponse(
+                ex.getErrors(),
+                HttpStatus.BAD_REQUEST
+        );
     }
 
-
+    // 🔹 Invalid JSON (400)
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<?> handleInvalidJson(HttpMessageNotReadableException ex) {
-        Map<String, Object> error = new LinkedHashMap<>();
-        error.put("error", "Invalid JSON");
-       // error.put("message", "Check request body syntax");
-        error.put("message", ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+
+        return CommonUtil.createErrorResponseMessage(
+                "Invalid JSON format",
+                HttpStatus.BAD_REQUEST
+        );
     }
 
-
-    @ExceptionHandler(ExistDataException.class)
-    public ResponseEntity<?> handleExistDataException(ExistDataException ex) {
-
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
-    }
-
+    // 🔹 File Not Found (404)
     @ExceptionHandler(FileNotFoundException.class)
     public ResponseEntity<?> handleFileNotFoundException(FileNotFoundException e){
-        return CommonUtil.createErrorResponse(e.getMessage(),HttpStatus.NOT_FOUND);
+        return CommonUtil.createErrorResponseMessage(
+                e.getMessage(),
+                HttpStatus.NOT_FOUND
+        );
     }
 
+    // 🔹 Business Rule / Runtime Errors (400)
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<?> handleRuntimeException(RuntimeException e){
+        log.error("RuntimeException :: {}", e.getMessage());
+        return CommonUtil.createErrorResponseMessage(
+                e.getMessage(),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    // 🔹 Generic Exception (500) - KEEP THIS LAST
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<?> handleException(Exception e){
+        log.error("Unhandled Exception :: ", e);
+        return CommonUtil.createErrorResponseMessage(
+                "Something went wrong",
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
+    }
 }

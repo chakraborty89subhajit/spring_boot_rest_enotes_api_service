@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -32,5 +33,5 @@ public class Notes  extends BaseModel{
     private FileDetails fileDetails;
 
     private Boolean isDeleted;
-    private Date deleteOn;
+    private LocalDateTime deleteOn;
 }

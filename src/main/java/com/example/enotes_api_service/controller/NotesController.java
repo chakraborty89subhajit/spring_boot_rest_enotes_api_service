@@ -112,5 +112,17 @@ return CommonUtil.createBuildResponseMessage("delete success",HttpStatus.OK) ;
         }
         return CommonUtil.createErrorResponse(notes,HttpStatus.OK);
     }
+@DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> hardDeleteNotes(@PathVariable Integer id) throws Exception{
+        notesService.hardDeleteNotes(id);
+        return CommonUtil.createBuildResponseMessage("delete successfull", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> emptyRecycleBin() throws Exception{
+        int userId=2;
+        notesService.emptyRecycleBin(userId);
+        return CommonUtil.createBuildResponseMessage("deleted succesfully",HttpStatus.OK);
+    }
 
 }

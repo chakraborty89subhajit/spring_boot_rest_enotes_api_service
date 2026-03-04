@@ -22,4 +22,7 @@ public interface NotesService  {
 
     public List<NotesDTO> getUserRecycleBinNotes(Integer userId);
 
+    public void hardDeleteNotes(Integer id) ;
+
+    public  void emptyRecycleBin(int userId);
 }
