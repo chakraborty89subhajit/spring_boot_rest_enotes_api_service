@@ -27,8 +27,10 @@ public interface NotesRepository extends JpaRepository<Notes, Integer> {
 
    // List<Notes> findByCreated_ByAndIsDeletedTrue(int userId);
   // List<Notes> findByCreated_byAndIsDeletedTrue(Integer created_by);
-    List<Notes> findByCreated_byAndIsDeletedTrue(Integer created_by);
+    //List<Notes> findByCreated_byAndIsDeletedTrue(Integer created_by);
 
+    @Query("SELECT n FROM Notes n WHERE n.created_by = :userId AND n.isDeleted = true")
+    List<Notes> findByCreated_byAndIsDeletedTrue(@Param("userId") Integer userId);
    // @Query("SELECT n FROM Notes n WHERE n.createdBy = :createdBy AND n.isDeleted = true")
     //List<Notes> getDeletedNotesByCreatedBy(@Param("createdBy") Integer createdBy);
 
