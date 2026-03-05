@@ -1,12 +1,15 @@
 package com.example.enotes_api_service.serviceImpl;
 
 import com.example.enotes_api_service.dto.CategoryDTO;
+import com.example.enotes_api_service.dto.FavoriteNoteDTO;
 import com.example.enotes_api_service.dto.NotesDTO;
 import com.example.enotes_api_service.dto.NotesResponse;
+import com.example.enotes_api_service.entity.FavoriteNote;
 import com.example.enotes_api_service.entity.FileDetails;
 import com.example.enotes_api_service.entity.Notes;
 import com.example.enotes_api_service.exception.ResourceNotFoundException;
 import com.example.enotes_api_service.repo.CategoryRepository;
+import com.example.enotes_api_service.repo.FavoriteNoteRepository;
 import com.example.enotes_api_service.repo.FileRepository;
 import com.example.enotes_api_service.repo.NotesRepository;
 import com.example.enotes_api_service.service.NotesService;
@@ -51,6 +54,9 @@ public class NotesServiceImpl implements NotesService {
 
     @Autowired
     private FileRepository fileRepository;
+
+    @Autowired
+    private FavoriteNoteRepository favoriteNoteRepository;
 
     @Value("${file.upload.path}")
     private String uploadPath;
@@ -283,6 +289,46 @@ public class NotesServiceImpl implements NotesService {
             notesRepository.deleteAll(recycleNotes);
         }
     }
+
+
+    //this method takes notes id as param
+    @Override
+    public void favoriteNotes(Integer id) throws Exception {
+        int userId=2;
+        Notes notes = notesRepository.findById(id)
+                .orElseThrow(()->
+                        new ResourceNotFoundException("note not found with id: "+id));
+
+        FavoriteNote favoriteNote =FavoriteNote.builder()
+                .note(notes)
+                .userId(userId)
+                .build();
+
+        favoriteNoteRepository.save(favoriteNote);
+
+    }
+
+
+    //this method takes favorite notes id as parameter
+    @Override
+    public void unfavoriteNotes(Integer id) throws Exception {
+        FavoriteNote favNote = favoriteNoteRepository.findById(id)
+                .orElseThrow(()->new ResourceNotFoundException("no fav note with id : "+id));
+        favoriteNoteRepository.delete(favNote);
+    }
+
+    @Override
+    public List<FavoriteNoteDTO> getuserFavoriteNotes() throws Exception {
+        int userId=2;
+        List<FavoriteNote> favoriteNotes = favoriteNoteRepository.findByUserId(userId);
+
+        return favoriteNotes
+                .stream()
+                .map(fn->mapper.map(fn,FavoriteNoteDTO.class))
+                .collect(Collectors.toList());
+    }
+
+
 }
 
 

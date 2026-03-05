@@ -1,5 +1,6 @@
 package com.example.enotes_api_service.service;
 
+import com.example.enotes_api_service.dto.FavoriteNoteDTO;
 import com.example.enotes_api_service.dto.NotesDTO;
 import com.example.enotes_api_service.dto.NotesResponse;
 import com.example.enotes_api_service.entity.FileDetails;
@@ -25,4 +26,10 @@ public interface NotesService  {
     public void hardDeleteNotes(Integer id) ;
 
     public  void emptyRecycleBin(int userId);
+
+
+    //favorite notes methods
+    public void favoriteNotes(Integer id) throws Exception;
+    public void unfavoriteNotes(Integer id) throws Exception;
+    public List<FavoriteNoteDTO> getuserFavoriteNotes() throws Exception;
 }
