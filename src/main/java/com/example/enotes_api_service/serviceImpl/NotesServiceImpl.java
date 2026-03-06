@@ -328,6 +328,28 @@ public class NotesServiceImpl implements NotesService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Boolean copyNotes(Integer id) throws Exception {
+        Notes notes = notesRepository.findById(id)
+                .orElseThrow(()->
+                        new ResourceNotFoundException("notes id invalid! not found"));
+
+        Notes copyNotes = Notes.builder()
+                .title(notes.getTitle())
+                .description(notes.getDescription())
+                .category(notes.getCategory())
+                .isDeleted(false)
+                .fileDetails(null)
+                .build();
+
+        Notes savecopynotes = notesRepository.save(copyNotes);
+
+        if(!ObjectUtils.isEmpty(savecopynotes)){
+            return true;
+        }
+        return false;
+    }
+
 
 }
 

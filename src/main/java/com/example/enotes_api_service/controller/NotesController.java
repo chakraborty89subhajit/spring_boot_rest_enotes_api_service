@@ -151,4 +151,19 @@ return CommonUtil.createBuildResponseMessage("delete success",HttpStatus.OK) ;
         return CommonUtil.createBuildResponse(userFavoriteNote,HttpStatus.OK);
     }
 
+    //copy notes api
+    //this method takes original note id as parameter for coping notes
+    @GetMapping("/copy/{id}")
+    public ResponseEntity<?> copyNotes(@PathVariable Integer id) throws Exception{
+
+        Boolean copyNotes = notesService.copyNotes(id);
+        if(copyNotes){
+            return CommonUtil.createBuildResponseMessage("successfully copied",
+                    HttpStatus.CREATED);
+        }
+        return CommonUtil.createErrorResponseMessage("failed to copy notes",
+                HttpStatus.INTERNAL_SERVER_ERROR);
+
+    }
+
 }
