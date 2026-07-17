@@ -12,12 +12,14 @@ import javax.persistence.*;
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
-public class ToDo {
+public class ToDo extends BaseModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String title;
-    private Integer status;
+
+    @Column(name="status")
+    private Integer statusId;
 
 
 }

@@ -6,10 +6,10 @@ import com.example.enotes_api_service.util.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/todo")
@@ -27,5 +27,21 @@ public class ToDoController {
             return CommonUtil.createErrorResponseMessage
                     ("todo not saved properly",HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> saveToDo (@PathVariable Integer id) throws Exception{
+        ToDoDTO todo = todoService.getToDOById(id);
+        return CommonUtil.createBuildResponse(todo,HttpStatus.OK);
+    }
+
+
+    @GetMapping("/list")
+    public ResponseEntity<?> getAllTodoByUser() throws Exception{
+        List<ToDoDTO> todoList  = todoService.getToDoByUser();
+        if(CollectionUtils.isEmpty(todoList)){
+            return ResponseEntity.noContent().build();
+        }
+        return CommonUtil.createBuildResponse(todoList,HttpStatus.OK);
     }
 }
