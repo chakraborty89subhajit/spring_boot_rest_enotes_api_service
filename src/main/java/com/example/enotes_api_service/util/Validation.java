@@ -4,9 +4,11 @@ import com.example.enotes_api_service.dto.CategoryDTO;
 import com.example.enotes_api_service.dto.ToDoDTO;
 import com.example.enotes_api_service.dto.UserDTO;
 import com.example.enotes_api_service.enums.TodoStatus;
+import com.example.enotes_api_service.exception.ExistDataException;
 import com.example.enotes_api_service.exception.ResourceNotFoundException;
 import com.example.enotes_api_service.exception.ValidationException;
 import com.example.enotes_api_service.repo.RoleRepo;
+import com.example.enotes_api_service.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -23,6 +25,9 @@ public class Validation {
 
     @Autowired
     private RoleRepo roleRepo;
+
+    @Autowired
+    private UserRepo userRepo;
 
 
     public void categoryValidation(CategoryDTO categoryDTO) {
@@ -98,6 +103,13 @@ public class Validation {
         if(!StringUtils.hasText(userDTO.getEmail()) ||
             !userDTO.getEmail().matches(Constant.EMAIL_REGEX)){
             throw new IllegalArgumentException("email is invalid");
+        }else{
+            //valiadte email exists
+            Boolean existEmail= userRepo.existsByEmail(userDTO.getEmail());
+            if(existEmail){
+                throw new ExistDataException("email already exists");
+            }
+
         }
 
         //mobile no validation
