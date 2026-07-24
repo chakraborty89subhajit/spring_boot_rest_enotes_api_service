@@ -99,4 +99,11 @@ public class GlobalExceptionHandler {
         return CommonUtil.createErrorResponseMessage(e.getMessage(),HttpStatus.BAD_REQUEST);
 
     }
+
+    //success exception
+    @ExceptionHandler(SuccessException.class)
+    public ResponseEntity<?> handleSuccessException(SuccessException e){
+        log.error("globalexceptionhandeler::handle exception::"+e.getMessage());
+        return CommonUtil.createBuildResponseMessage(e.getMessage(),HttpStatus.OK);
+    }
 }

@@ -33,4 +33,7 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id") // Maps role foreign key
     )
     private List<Role> roles;
+    @OneToOne(cascade= CascadeType.ALL,fetch=FetchType.EAGER)
+    @JoinColumn(name= "status_id")
+    private AccountStatus status;
 }

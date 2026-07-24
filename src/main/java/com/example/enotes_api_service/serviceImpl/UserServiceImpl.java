@@ -2,6 +2,7 @@ package com.example.enotes_api_service.serviceImpl;
 
 import com.example.enotes_api_service.dto.EmailRequest;
 import com.example.enotes_api_service.dto.UserDTO;
+import com.example.enotes_api_service.entity.AccountStatus;
 import com.example.enotes_api_service.entity.Role;
 import com.example.enotes_api_service.entity.User;
 import com.example.enotes_api_service.repo.RoleRepo;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,23 +37,39 @@ public class UserServiceImpl implements UserService {
     private EmailSend emailSend;
 
     @Override
-    public Boolean register(UserDTO userDto) throws Exception {
+    public Boolean register(UserDTO userDto,String url) throws Exception {
 
         validation.userValidation(userDto);
         User user = mapper.map(userDto,User.class);
+
         setRole(userDto,user);
+        //setimg user status
+        AccountStatus status =  AccountStatus.builder()
+                .isActive(false)
+                .verificationCode(UUID.randomUUID().toString())
+                .build();
+
+        user.setStatus(status);
+
          User saveUser = userRepo.save(user);
          if(!ObjectUtils.isEmpty(saveUser)){
-             emailSend(saveUser);
+             emailSend(saveUser,url);
              return true;
          }
         return false;
     }
 
-    private void emailSend(User user) throws Exception{
-        String message= "Hi <b>"+user.getFirstName()+"</b>"+
+    private void emailSend(User user,String url) throws Exception{
+
+        String message= "Hi <b>[[userName]]</b>"+
                 "<b>register successfully done</b>"+
-                        "<a href='#'>click here</a>";
+                "<a href=\'[[url]]\'>click here</a>";
+
+        message = message.replace("[[userName]]",user.getFirstName());
+        message=message.replace("[[url]]",url+
+                "/api/v1/home/verify?uid="
+                        +user.getId()
+                        +"&code="+user.getStatus().getVerificationCode());
 
         EmailRequest emailReq = new EmailRequest();
         emailReq.setTo(user.getEmail());
