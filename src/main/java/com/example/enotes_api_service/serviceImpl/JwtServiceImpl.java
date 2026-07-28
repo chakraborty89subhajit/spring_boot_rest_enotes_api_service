@@ -2,9 +2,11 @@ package com.example.enotes_api_service.serviceImpl;
 
 import com.example.enotes_api_service.entity.User;
 import com.example.enotes_api_service.service.JwtService;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.KeyGenerator;
@@ -43,15 +45,75 @@ public class JwtServiceImpl  implements JwtService {
                 .add(claims)
                 .subject(user.getEmail())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis()+60*60+10))
+                .expiration(new Date(System.currentTimeMillis()+60*60*60*10))
                 .and()
                 .signWith(getKey())
                 .compact();
 
         return token;
     }
+
+
+
     private Key getKey(){
         byte[] keyByte= Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyByte);
     }
+
+    @Override
+    public String extractUserName(String token) {
+        Claims claims =extractAllClaims(token);
+
+
+        return claims.getSubject();
+    }
+
+    private Claims extractAllClaims(String token){
+        Claims claims = Jwts.parser()
+                .verifyWith(decryptkey(secretKey))
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        return claims;
+
+    }
+
+    private SecretKey decryptkey(String secretKey){
+        byte[] keyBytes= Decoders.BASE64.decode(secretKey);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+
+    //to get roles
+    public String role(String token){
+        Claims claims = extractAllClaims(token);
+        String role= (String)claims.get("role");
+        return role;
+
+    }
+
+
+    //validate the token
+    @Override
+    public Boolean validateToken(String token, UserDetails userDetails) {
+
+        String username= extractUserName(token);
+        Boolean isExpired = isTokenExpired(token);
+        if(username.equalsIgnoreCase(userDetails.getUsername()) && !isExpired){
+            return true;
+
+        }
+
+        return false;
+    }
+
+    private Boolean isTokenExpired(String token){
+        Claims claims = extractAllClaims(token);
+        Date expiredDate = claims.getExpiration();
+
+        //is token valid today
+        return expiredDate.before(new Date());
+
+    }
+
 }
