@@ -36,7 +36,7 @@ public class CustomUserDetails implements UserDetails {
         user.getRoles().forEach(r->{
             //add role r.getname() to the arraylist named authority
             //which is of the type simpleGrantedAuthority()
-           authority.add(new SimpleGrantedAuthority(r.getName()));
+           authority.add(new SimpleGrantedAuthority("ROLE_"+r.getName().toUpperCase()));
         });
         return authority;
     }
