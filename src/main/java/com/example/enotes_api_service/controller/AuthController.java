@@ -3,6 +3,8 @@ package com.example.enotes_api_service.controller;
 import com.example.enotes_api_service.dto.LoginRequest;
 import com.example.enotes_api_service.dto.LoginResponse;
 import com.example.enotes_api_service.dto.UserDTO;
+import com.example.enotes_api_service.dto.UserDTO;
+import com.example.enotes_api_service.dto.UserDTO;
 import com.example.enotes_api_service.service.UserService;
 import com.example.enotes_api_service.util.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/api/v1/user")
+@RequestMapping("/api/v1/auth")
 public class AuthController {
     @Autowired
     private UserService userService;

@@ -5,6 +5,7 @@ import com.example.enotes_api_service.dto.EmailRequest;
 import com.example.enotes_api_service.dto.LoginRequest;
 import com.example.enotes_api_service.dto.LoginResponse;
 import com.example.enotes_api_service.dto.UserDTO;
+//import com.example.enotes_api_service.dto.UserRequest;
 import com.example.enotes_api_service.entity.AccountStatus;
 import com.example.enotes_api_service.entity.Role;
 import com.example.enotes_api_service.entity.User;
@@ -55,12 +56,12 @@ public class UserServiceImpl implements UserService {
     private JwtService jwtService;
 
     @Override
-    public Boolean register(UserDTO userDto,String url) throws Exception {
+    public Boolean register(UserDTO userDTO, String url) throws Exception {
 
-        validation.userValidation(userDto);
-        User user = mapper.map(userDto,User.class);
+        validation.userValidation(userDTO);
+        User user = mapper.map(userDTO,User.class);
 
-        setRole(userDto,user);
+        setRole(userDTO,user);
         //setimg user status
         AccountStatus status =  AccountStatus.builder()
                 .isActive(false)

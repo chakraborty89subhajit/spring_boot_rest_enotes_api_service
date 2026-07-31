@@ -13,6 +13,7 @@ import com.example.enotes_api_service.repo.FavoriteNoteRepository;
 import com.example.enotes_api_service.repo.FileRepository;
 import com.example.enotes_api_service.repo.NotesRepository;
 import com.example.enotes_api_service.service.NotesService;
+import com.example.enotes_api_service.util.CommonUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.catalina.mapper.Mapper;
 import org.apache.commons.io.FilenameUtils;
@@ -213,13 +214,16 @@ public class NotesServiceImpl implements NotesService {
     }
 
     @Override
-    public NotesResponse getAllNotesByUser(Integer userId,Integer pageNo,Integer pageSize) {
+    public NotesResponse getAllNotesByUser(Integer pageNo,Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNo,pageSize);
+        Integer userId= CommonUtil.getLoggedinUser().getId();
         Page<Notes> pageNotes = notesRepository.findActiveNotesByUser(userId,pageable);
         List<NotesDTO> notesDTO = pageNotes
                 .get()
                 .map(n->mapper.map(n,NotesDTO.class))
                 .collect(Collectors.toList());
+
+
 
         NotesResponse notes = NotesResponse.builder()
                 .notes(notesDTO)
@@ -283,7 +287,8 @@ public class NotesServiceImpl implements NotesService {
     }
 
     @Override
-    public void emptyRecycleBin(int userId) {
+    public void emptyRecycleBin() {
+        Integer userId= CommonUtil.getLoggedinUser().getId();
         List<Notes> recycleNotes = notesRepository.findByCreated_byAndIsDeletedTrue(userId);
         if(!CollectionUtils.isEmpty(recycleNotes)){
             notesRepository.deleteAll(recycleNotes);

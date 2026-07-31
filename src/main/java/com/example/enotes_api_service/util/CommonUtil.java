@@ -1,9 +1,12 @@
 package com.example.enotes_api_service.util;
 
+import com.example.enotes_api_service.config.security.CustomUserDetails;
+import com.example.enotes_api_service.entity.User;
 import com.example.enotes_api_service.handler.GenericResponse;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -100,6 +103,20 @@ public class CommonUtil {
         String apiUrl = request.getRequestURL().toString();
         apiUrl= apiUrl.replace(request.getServletPath(),"");
         return apiUrl;
+
+    }
+
+    public static User getLoggedinUser(){
+        try{
+            CustomUserDetails logUser= (CustomUserDetails) SecurityContextHolder
+                    .getContext()
+                    .getAuthentication()
+                    .getPrincipal();
+            return logUser.getUser();
+        }catch(Exception e){
+            throw e;
+
+        }
 
     }
 

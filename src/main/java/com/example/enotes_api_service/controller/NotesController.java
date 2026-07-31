@@ -87,8 +87,8 @@ public class NotesController {
             @RequestParam(name="pageSize",defaultValue = "10") Integer pageSize
     ){
         //display only notes created by user id= 2
-        Integer userId= 2;
-        NotesResponse notes =notesService.getAllNotesByUser(userId,pageNo,pageSize);
+       // Integer userId= 2;
+        NotesResponse notes =notesService.getAllNotesByUser(pageNo,pageSize);
         return CommonUtil.createBuildResponse(notes,HttpStatus.OK);
     }
 
@@ -131,8 +131,9 @@ return CommonUtil.createBuildResponseMessage("delete success",HttpStatus.OK) ;
     @DeleteMapping("/delete")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> emptyRecycleBin() throws Exception{
-        int userId=2;
-        notesService.emptyRecycleBin(userId);
+        //int userId=2;
+
+        notesService.emptyRecycleBin();
         return CommonUtil.createBuildResponseMessage("deleted succesfully",HttpStatus.OK);
     }
 
