@@ -1,7 +1,10 @@
 package com.example.enotes_api_service.config.security;
 
+import com.example.enotes_api_service.handler.GenericResponse;
 import com.example.enotes_api_service.service.JwtService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -60,11 +63,33 @@ public class JwtFilter extends OncePerRequestFilter {
                 }
             }
         }catch(Exception e){
+            /**
             e.printStackTrace();
             response.setContentType("application/json");
             response.getWriter().write(e.getMessage());
             return;
+             **/
+            try {
+                generateResponseError(response,e);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+
+            return;
         }
         filterChain.doFilter(request, response);
+    }
+    private void generateResponseError(HttpServletResponse response,Exception e) throws Exception{
+
+        response.setContentType("application/json");
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        Object error = GenericResponse.builder()
+                .status("failed")
+                .message(e.getMessage())
+                .responseStatus(HttpStatus.UNAUTHORIZED)
+                .build()
+                .create()
+                .getBody();
+        response.getWriter().write(new ObjectMapper().writeValueAsString(error));
     }
 }

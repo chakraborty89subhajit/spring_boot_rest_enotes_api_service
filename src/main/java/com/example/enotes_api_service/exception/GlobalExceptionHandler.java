@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -112,5 +113,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleBadCredentialException(BadCredentialsException e){
         log.error("globalexceptionhandeler::handle exception::"+e.getMessage());
         return CommonUtil.createErrorResponse(e.getMessage(),HttpStatus.BAD_REQUEST);
+    }
+
+    //handle accessdenied exception
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException e){
+        log.error("globalexceptionhandeler::handle exception::"+e.getMessage());
+        return CommonUtil.createErrorResponse(e.getMessage(),HttpStatus.FORBIDDEN);
     }
 }
