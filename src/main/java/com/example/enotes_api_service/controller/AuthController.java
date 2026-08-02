@@ -3,9 +3,7 @@ package com.example.enotes_api_service.controller;
 import com.example.enotes_api_service.dto.LoginRequest;
 import com.example.enotes_api_service.dto.LoginResponse;
 import com.example.enotes_api_service.dto.UserDTO;
-import com.example.enotes_api_service.dto.UserDTO;
-import com.example.enotes_api_service.dto.UserDTO;
-import com.example.enotes_api_service.service.UserService;
+import com.example.enotes_api_service.service.AuthService;
 import com.example.enotes_api_service.util.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
     @Autowired
-    private UserService userService;
+    private AuthService authService;
 
     @PostMapping("/")
     public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO, HttpServletRequest request)
@@ -30,7 +28,7 @@ public class AuthController {
 
         String url= CommonUtil.getUrl(request);
 
-        Boolean register = userService.register(userDTO,url);
+        Boolean register = authService.register(userDTO,url);
         if(register){
             return CommonUtil.createBuildResponseMessage(
                     "register success", HttpStatus.CREATED);
@@ -42,7 +40,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) throws Exception{
 
-        LoginResponse loginResponse = userService.login(request);
+        LoginResponse loginResponse = authService.login(request);
 
         if(ObjectUtils.isEmpty(loginResponse)){
             return CommonUtil.createErrorResponseMessage(
