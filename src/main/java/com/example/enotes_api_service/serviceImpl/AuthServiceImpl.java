@@ -48,7 +48,7 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
-   
+
 
     @Autowired
     private JwtService jwtService;
