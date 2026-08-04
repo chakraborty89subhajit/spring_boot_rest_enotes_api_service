@@ -1,0 +1,363 @@
+package com.example.enotes_api_service.serviceImpl;
+
+import com.example.enotes_api_service.dto.CategoryDTO;
+import com.example.enotes_api_service.dto.FavoriteNoteDTO;
+import com.example.enotes_api_service.dto.NotesDTO;
+import com.example.enotes_api_service.dto.NotesResponse;
+import com.example.enotes_api_service.entity.FavoriteNote;
+import com.example.enotes_api_service.entity.FileDetails;
+import com.example.enotes_api_service.entity.Notes;
+import com.example.enotes_api_service.exception.ResourceNotFoundException;
+import com.example.enotes_api_service.repo.CategoryRepository;
+import com.example.enotes_api_service.repo.FavoriteNoteRepository;
+import com.example.enotes_api_service.repo.FileRepository;
+import com.example.enotes_api_service.repo.NotesRepository;
+import com.example.enotes_api_service.service.NotesService;
+import com.example.enotes_api_service.util.CommonUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.catalina.mapper.Mapper;
+import org.apache.commons.io.FilenameUtils;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StreamUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+public class NotesServiceImpl implements NotesService {
+
+    @Autowired
+    private NotesRepository notesRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+    @Autowired
+    private ModelMapper mapper;
+
+    @Autowired
+    private FileRepository fileRepository;
+
+    @Autowired
+    private FavoriteNoteRepository favoriteNoteRepository;
+
+    @Value("${file.upload.path}")
+    private String uploadPath;
+
+    @Override
+    public Boolean saveNotes(String notes, MultipartFile file) throws Exception {
+
+        //converting string to json
+        ObjectMapper ob = new ObjectMapper();
+        NotesDTO notesDTO = ob.readValue(notes, NotesDTO.class);
+
+
+
+        //check if any id is present
+        if(!ObjectUtils.isEmpty(notesDTO.getId())){
+            updateNotes(notesDTO,file);
+        }
+
+        FileDetails fileDetails = saveFileDetails(file);
+
+        //checking valiadtion of category
+        checkCategoryExists(notesDTO.getCategory());
+
+        Notes notesMap = mapper.map(notesDTO, Notes.class);
+
+        //for the first time if notes get saved then set
+        //isDeleted = false
+
+        notesDTO.setDeleted(false);
+        notesDTO.setDeletedOn(null);
+
+//FileDetails fileDtls = saveFileDetails(file);
+        if (!ObjectUtils.isEmpty(fileDetails)) {
+            notesMap.setFileDetails(fileDetails);
+
+        } else {
+            if (ObjectUtils.isEmpty(notesDTO.getId())) {
+                notesMap.setFileDetails(null);
+            }
+        }
+
+        Notes saveNotes = notesRepository.save(notesMap);
+
+        if (!ObjectUtils.isEmpty(saveNotes)) {
+            return true;
+        } else {
+            return false;
+        }
+
+
+    }
+
+    private void updateNotes(NotesDTO notesDTO, MultipartFile file)throws Exception {
+        Notes exixtNotes = notesRepository.findById(notesDTO.getId())
+                .orElseThrow(()->new ResourceNotFoundException("invalid notes id"));
+        //if there is no file given in the request then set old file
+        if(ObjectUtils.isEmpty(file)){
+            notesDTO.setFileDetails(mapper.map(exixtNotes.getFileDetails(), NotesDTO.FileDTO.class));
+
+        }
+
+    }
+
+
+    private FileDetails saveFileDetails(MultipartFile file) throws IOException {
+        if (!ObjectUtils.isEmpty(file) && !file.isEmpty()) {
+            FileDetails fileDetails = new FileDetails();
+            String originalFileName = file.getOriginalFilename();
+            fileDetails.setOriginalFileName(originalFileName);
+            fileDetails.setDisplayFileName(getDisplayName(originalFileName));
+
+            //generate any random string
+            String rndString = UUID.randomUUID().toString();
+            //String extension = FilenameUtils.getExtension(originalFileName);
+            String extension = FilenameUtils.getExtension(originalFileName).toLowerCase();
+
+            //allowing only specific type of file to database
+            List<String> extensionAllowed = Arrays.asList("pdf","xlsx","jpg","docx");
+
+            if(!extensionAllowed.contains(extension) ){
+                throw new IOException("invalid file format allow only pdf, xlsx, jpg,docx");
+
+            }
+
+            String uploadFileName = rndString + "." + extension;
+            fileDetails.setUploadedFileName(uploadFileName);
+            fileDetails.setFileSize(file.getSize());
+
+
+            File saveFile = new File(uploadPath);
+            if (!saveFile.exists()) {
+                saveFile.mkdirs();
+            }
+            //path
+            String storePath = uploadPath.concat(uploadFileName);
+            fileDetails.setPath(storePath);
+
+            //upload file java NIO way
+            Long upload = Files.copy(file.getInputStream(), Paths.get(storePath));
+            if (upload != 0) {
+                FileDetails saveFileDetails = fileRepository.save(fileDetails);
+
+                return saveFileDetails;
+            }
+
+        } else {
+            return null;
+        }
+        return null;
+    }
+
+    private String getDisplayName(String origunalFileName) {
+
+        String extension = FilenameUtils.getExtension(origunalFileName);
+        String fileName = FilenameUtils.removeExtension(origunalFileName);
+
+        if (fileName.length() > 8) {
+            fileName = fileName.substring(0, 7);
+
+
+        }
+        fileName = fileName + "." + extension;
+        return fileName;
+    }
+
+    private void checkCategoryExists(NotesDTO.CategoryDTO categoryDTO) throws Exception {
+        categoryRepository.findById(categoryDTO.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("category id is Invalid"));
+    }
+
+    @Override
+    public List<NotesDTO> getAllNotes() {
+        return notesRepository
+                .findAll()
+                .stream()
+                .map(note -> mapper.map(note, NotesDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public byte[] downloadFile(FileDetails fileDetails) throws Exception {
+
+
+        InputStream io = new FileInputStream(fileDetails.getPath());
+        byte[] byteData = StreamUtils.copyToByteArray(io);
+        return byteData;
+    }
+
+    @Override
+    public FileDetails getFileDetails(Integer id) throws Exception {
+        FileDetails fileDetails = fileRepository.findById(id)
+                .orElseThrow(()->new ResourceNotFoundException("file not available"));
+        return fileDetails;
+    }
+
+    @Override
+    public NotesResponse getAllNotesByUser(Integer pageNo,Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNo,pageSize);
+        Integer userId= CommonUtil.getLoggedinUser().getId();
+        Page<Notes> pageNotes = notesRepository.findActiveNotesByUser(userId,pageable);
+        List<NotesDTO> notesDTO = pageNotes
+                .get()
+                .map(n->mapper.map(n,NotesDTO.class))
+                .collect(Collectors.toList());
+
+
+
+        NotesResponse notes = NotesResponse.builder()
+                .notes(notesDTO)
+                .pageNo(pageNotes.getNumber())
+                .pageSize(pageNotes.getSize())
+                .totalElements(pageNotes.getTotalElements())
+                .totalPages(pageNotes.getTotalPages())
+                .isFirst(pageNotes.isFirst())
+                .isLast(pageNotes.isLast())
+                .build();
+
+        return notes;
+    }
+
+    @Override
+    public void softDeleteNotes(Integer id) throws Exception {
+        Notes notes = notesRepository.findById(id).orElseThrow(()->
+                new ResourceNotFoundException("notes id invalid"));
+        notes.setIsDeleted(true);
+        notes.setDeleteOn(LocalDateTime.now());
+        notesRepository.save(notes);
+    }
+
+    @Override
+    public void restoreNote(Integer id) throws Exception {
+        Notes notes = notesRepository.findById(id).orElseThrow(()->
+                new ResourceNotFoundException("notes with id : "+id+" can not be restored")
+                );
+        notes.setIsDeleted(false);
+        notes.setDeleteOn(null);
+        notesRepository.save(notes);
+    }
+
+    @Override
+    public List<NotesDTO> getUserRecycleBinNotes(Integer userId) {
+        List<Notes> recycleNotes = notesRepository.findDeletedNotesByUser(userId);
+        List<NotesDTO> notesDTOList = recycleNotes
+                .stream()
+                .map(
+                note->mapper.map(note, NotesDTO.class))
+                .collect(Collectors.toList());
+        return notesDTOList;
+    }
+
+    @Override
+    public void hardDeleteNotes(Integer id) {
+
+        Notes notes = notesRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("notes not found with id : " + id));
+
+        if (Boolean.TRUE.equals(notes.getIsDeleted())) {
+
+            notesRepository.delete(notes);
+
+        } else {
+
+            throw new RuntimeException("You can not hard delete directly");
+
+        }
+    }
+
+    @Override
+    public void emptyRecycleBin() {
+        Integer userId= CommonUtil.getLoggedinUser().getId();
+        List<Notes> recycleNotes = notesRepository.findByCreated_byAndIsDeletedTrue(userId);
+        if(!CollectionUtils.isEmpty(recycleNotes)){
+            notesRepository.deleteAll(recycleNotes);
+        }
+    }
+
+
+    //this method takes notes id as param
+    @Override
+    public void favoriteNotes(Integer id) throws Exception {
+        int userId=2;
+        Notes notes = notesRepository.findById(id)
+                .orElseThrow(()->
+                        new ResourceNotFoundException("note not found with id: "+id));
+
+        FavoriteNote favoriteNote =FavoriteNote.builder()
+                .note(notes)
+                .userId(userId)
+                .build();
+
+        favoriteNoteRepository.save(favoriteNote);
+
+    }
+
+
+    //this method takes favorite notes id as parameter
+    @Override
+    public void unfavoriteNotes(Integer id) throws Exception {
+        FavoriteNote favNote = favoriteNoteRepository.findById(id)
+                .orElseThrow(()->new ResourceNotFoundException("no fav note with id : "+id));
+        favoriteNoteRepository.delete(favNote);
+    }
+
+    @Override
+    public List<FavoriteNoteDTO> getuserFavoriteNotes() throws Exception {
+        int userId=2;
+        List<FavoriteNote> favoriteNotes = favoriteNoteRepository.findByUserId(userId);
+
+        return favoriteNotes
+                .stream()
+                .map(fn->mapper.map(fn,FavoriteNoteDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Boolean copyNotes(Integer id) throws Exception {
+        Notes notes = notesRepository.findById(id)
+                .orElseThrow(()->
+                        new ResourceNotFoundException("notes id invalid! not found"));
+
+        Notes copyNotes = Notes.builder()
+                .title(notes.getTitle())
+                .description(notes.getDescription())
+                .category(notes.getCategory())
+                .isDeleted(false)
+                .fileDetails(null)
+                .build();
+
+        Notes savecopynotes = notesRepository.save(copyNotes);
+
+        if(!ObjectUtils.isEmpty(savecopynotes)){
+            return true;
+        }
+        return false;
+    }
+
+
+}
+
+
+
+
