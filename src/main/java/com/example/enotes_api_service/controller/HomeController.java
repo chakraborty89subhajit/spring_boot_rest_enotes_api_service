@@ -1,15 +1,13 @@
 package com.example.enotes_api_service.controller;
 
+import com.example.enotes_api_service.dto.PasswordResetRequest;
 import com.example.enotes_api_service.service.HomeService;
 import com.example.enotes_api_service.service.UserService;
 import com.example.enotes_api_service.util.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -47,15 +45,23 @@ public class HomeController {
     }
 
     @GetMapping("/verify-password-link")
-    public ResponseEntity<?> verifyPasswordResetLink(){
+    public ResponseEntity<?> verifyPasswordResetLink(@RequestParam Integer uid,
+                                                     @RequestParam String code) throws Exception{
+        userService.verifyPasswordResetLink(uid,code);
+        return CommonUtil.createBuildResponseMessage
+                ("verification done successfully",HttpStatus.OK);
 
-        return null;
+
     }
 
-    @GetMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(){
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody PasswordResetRequest
+                                                       passwordResetRequest)throws Exception{
 
-        return null;
+        userService.resetPassword(passwordResetRequest);
+        return CommonUtil.createBuildResponseMessage(
+                "password reset done successfully",HttpStatus.OK);
+
     }
 
 }

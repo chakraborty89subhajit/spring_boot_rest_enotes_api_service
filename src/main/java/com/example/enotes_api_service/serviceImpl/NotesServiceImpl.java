@@ -355,7 +355,35 @@ public class NotesServiceImpl implements NotesService {
         return false;
     }
 
+    @Override
+    public NotesResponse getNotesByUserSearch(Integer pageNo,
+                                              Integer pageSize,
+                                              String keyword) {
 
+        Integer userId = CommonUtil.getLoggedinUser().getId();
+
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+        Page<Notes> pageNotes = notesRepository.searchNotes(
+                keyword == null ? "" : keyword.trim(),
+                userId,
+                pageable);
+
+        List<NotesDTO> notesDTO = pageNotes.getContent()
+                .stream()
+                .map(note -> mapper.map(note, NotesDTO.class))
+                .collect(Collectors.toList());
+
+        return NotesResponse.builder()
+                .notes(notesDTO)
+                .pageNo(pageNotes.getNumber())
+                .pageSize(pageNotes.getSize())
+                .totalElements(pageNotes.getTotalElements())
+                .totalPages(pageNotes.getTotalPages())
+                .isFirst(pageNotes.isFirst())
+                .isLast(pageNotes.isLast())
+                .build();
+    }
 }
 
 

@@ -37,4 +37,29 @@ public interface NotesRepository extends JpaRepository<Notes, Integer> {
 //Page<Notes> findByCreated_ByUserAndIsDeletedFalse(Integer userId,Pageable pageable);
 //@Query("SELECT n FROM Notes n WHERE n.created_by = :userId AND n.isDeleted = false")
 //Page<Notes> findActiveNotesByUser(@Param("userId") Integer userId, Pageable pageable);
+
+
+/**
+    @Query("SELECT n FROM Notes n  WHERE " +
+            "( LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(n.description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(n.category.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "AND n.isDeleted = false " +
+            "AND n.created_by = :userId")
+    Page<Notes> searchNotes(@Param("keyword") String keyword,
+                            @Param("userId") Integer userId,
+                            Pageable pageable);
+
+                            **/
+@Query(" SELECT n FROM Notes n LEFT JOIN n.category c WHERE n.created_by = :userId " +
+        "AND n.isDeleted = false " +
+        "AND ( " +
+        "LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+        "OR LOWER(n.description) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+        "OR LOWER(COALESCE(c.name, '')) LIKE LOWER(CONCAT('%', :keyword, '%'))" +
+        ") " +
+        "")
+Page<Notes> searchNotes(@Param("keyword") String keyword,
+                        @Param("userId") Integer userId,
+                        Pageable pageable);
 }

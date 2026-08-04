@@ -2,6 +2,7 @@ package com.example.enotes_api_service.serviceImpl;
 
 import com.example.enotes_api_service.dto.EmailRequest;
 import com.example.enotes_api_service.dto.PasswordChangeRequest;
+import com.example.enotes_api_service.dto.PasswordResetRequest;
 import com.example.enotes_api_service.entity.User;
 import com.example.enotes_api_service.exception.ResourceNotFoundException;
 import com.example.enotes_api_service.repo.UserRepo;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.UUID;
@@ -55,6 +57,8 @@ public class userServiceImpl implements UserService {
         sendEmailRequest(updateUser, url);
     }
 
+
+
     private void sendEmailRequest(User updateUser, String url)throws Exception{
 
         String message = "Hi <b>[[userName]]</b><br>" +
@@ -76,4 +80,45 @@ public class userServiceImpl implements UserService {
 
         emailsend.send(emailReq);
     }
+
+    @Override
+    public void verifyPasswordResetLink(Integer uid, String code) throws Exception {
+
+        User user = userRepo.findById(uid)
+                .orElseThrow(()->new ResourceNotFoundException("invalid user id"));
+        verifyPasswordResetToken(user.getStatus().getPasswordResetToken(),code);
+    }
+
+
+    private void verifyPasswordResetToken(String existToken, String requestToken) {
+        // 1. Request token must not be null or empty
+        if (!StringUtils.hasText(requestToken)) {
+            throw new IllegalArgumentException("token is missing");
+        }
+
+        // 2. Token in DB must exist (if null/empty, link was already used)
+        if (!StringUtils.hasText(existToken)) {
+            throw new IllegalArgumentException("password already reset or token expired");
+        }
+
+        // 3. Tokens must match
+        if (!existToken.equals(requestToken)) {
+            throw new IllegalArgumentException("invalid token");
+        }
+
+        // Success! Do nothing so execution continues smoothly.
+    }
+
+    @Override
+    public void resetPassword(PasswordResetRequest passwordResetRequest) throws Exception {
+
+        User user = userRepo.findById(passwordResetRequest.getUid())
+                .orElseThrow(()->new ResourceNotFoundException("invalid User id"));
+        String encodedPassword = passwordEncoder.encode(passwordResetRequest.getNewPassword());
+        user.setPassword(encodedPassword);
+        user.getStatus().setPasswordResetToken(null);
+        userRepo.save(user);
+
+    }
+
 }
