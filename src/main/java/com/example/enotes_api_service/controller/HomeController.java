@@ -22,8 +22,8 @@ public class HomeController implements HomeControllerEndpoint {
     private UserService userService;
 
     @Override
-    public ResponseEntity<?> verifyUserAccount(@RequestParam Integer uid,
-                                               @RequestParam String code ) throws Exception{
+    public ResponseEntity<?> verifyUserAccount( Integer uid,
+                                                String code ) throws Exception{
         Boolean verifyAccount = homeService.verifyAccount(uid,code);
 
         if(verifyAccount){
@@ -36,7 +36,7 @@ public class HomeController implements HomeControllerEndpoint {
     }
 
  @Override
-    public ResponseEntity<?> sendEmailForPasswordreset(@RequestParam String email,
+    public ResponseEntity<?> sendEmailForPasswordreset( String email,
                                                        HttpServletRequest request)throws Exception
     {
         userService.sendEmailPasswordReset(email,request);
@@ -46,8 +46,8 @@ public class HomeController implements HomeControllerEndpoint {
     }
 
     @Override
-    public ResponseEntity<?> verifyPasswordResetLink(@RequestParam Integer uid,
-                                                     @RequestParam String code) throws Exception{
+    public ResponseEntity<?> verifyPasswordResetLink( Integer uid,
+                                                      String code) throws Exception{
         userService.verifyPasswordResetLink(uid,code);
         return CommonUtil.createBuildResponseMessage
                 ("verification done successfully",HttpStatus.OK);
@@ -56,7 +56,7 @@ public class HomeController implements HomeControllerEndpoint {
     }
 
     @Override
-    public ResponseEntity<?> resetPassword(@RequestBody PasswordResetRequest
+    public ResponseEntity<?> resetPassword( PasswordResetRequest
                                                        passwordResetRequest)throws Exception{
 
         userService.resetPassword(passwordResetRequest);

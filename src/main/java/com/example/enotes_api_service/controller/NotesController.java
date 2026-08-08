@@ -58,7 +58,7 @@ public class NotesController implements NotesControllerEndpoint {
 
     //implementing dowlod files with notes
     @Override
-    public ResponseEntity<?> downloadFile(@PathVariable Integer id) throws Exception{
+    public ResponseEntity<?> downloadFile( Integer id) throws Exception{
 
         FileDetails fileDetails = notesService.getFileDetails(id);
         byte[] data = notesService.downloadFile(fileDetails);
@@ -80,8 +80,8 @@ public class NotesController implements NotesControllerEndpoint {
     //getting all notes by any specific user
     @Override
     public ResponseEntity<?> getAllNotesByUser(
-            @RequestParam(name="pageNo",defaultValue = "0") Integer pageNo,
-            @RequestParam(name="pageSize",defaultValue = "10") Integer pageSize
+            Integer pageNo,
+             Integer pageSize
     ){
         //display only notes created by user id= 2
        // Integer userId= 2;
@@ -91,14 +91,14 @@ public class NotesController implements NotesControllerEndpoint {
 
 //creating soft delete notes api
 @Override
-    public ResponseEntity<?> deleteNots(@PathVariable Integer id) throws Exception{
+    public ResponseEntity<?> deleteNots( Integer id) throws Exception{
         notesService.softDeleteNotes(id);
 return CommonUtil.createBuildResponseMessage("delete success",HttpStatus.OK) ;
     }
 
     //creating notes restore api
     @Override
-    public ResponseEntity<?> restoreNotes(@PathVariable Integer id) throws Exception{
+    public ResponseEntity<?> restoreNotes( Integer id) throws Exception{
         notesService.restoreNote(id);
         return CommonUtil.createBuildResponseMessage("note restore successfully",HttpStatus.OK);
         }
@@ -116,7 +116,7 @@ return CommonUtil.createBuildResponseMessage("delete success",HttpStatus.OK) ;
         return CommonUtil.createErrorResponse(notes,HttpStatus.OK);
     }
 @Override
-    public ResponseEntity<?> hardDeleteNotes(@PathVariable Integer id) throws Exception{
+    public ResponseEntity<?> hardDeleteNotes( Integer id) throws Exception{
         notesService.hardDeleteNotes(id);
         return CommonUtil.createBuildResponseMessage("delete successfull", HttpStatus.OK);
     }
@@ -130,14 +130,14 @@ return CommonUtil.createBuildResponseMessage("delete success",HttpStatus.OK) ;
     }
 
     @Override
-    public ResponseEntity<?> favoriteNote(@PathVariable Integer id) throws Exception{
+    public ResponseEntity<?> favoriteNote( Integer id) throws Exception{
         notesService.favoriteNotes(id);
         return CommonUtil.createBuildResponseMessage(
                 "note added as favorite",HttpStatus.CREATED);
     }
 
     @Override
-    public ResponseEntity<?> nFavoriteNote(@PathVariable Integer favNoteId)throws Exception{
+    public ResponseEntity<?> nFavoriteNote( Integer favNoteId)throws Exception{
         notesService.unfavoriteNotes(favNoteId);
         return CommonUtil.createBuildResponseMessage(
                 "favorite note removed successfully",HttpStatus.OK);
@@ -157,7 +157,7 @@ return CommonUtil.createBuildResponseMessage("delete success",HttpStatus.OK) ;
     //copy notes api
     //this method takes original note id as parameter for coping notes
     @Override
-    public ResponseEntity<?> copyNotes(@PathVariable Integer id) throws Exception{
+    public ResponseEntity<?> copyNotes( Integer id) throws Exception{
 
         Boolean copyNotes = notesService.copyNotes(id);
         if(copyNotes){
@@ -169,9 +169,9 @@ return CommonUtil.createBuildResponseMessage("delete success",HttpStatus.OK) ;
 
     }
 @Override
-    public ResponseEntity<?> searchNotes(@RequestParam(name="key",defaultValue = "") String key,
-                                         @RequestParam(name="pageNo",defaultValue = "0") Integer pageNO,
-                                         @RequestParam(name="pageSize",defaultValue = "10") Integer pageSize){
+    public ResponseEntity<?> searchNotes( String key,
+                                         Integer pageNO,
+                                         Integer pageSize){
 
         NotesResponse notes= notesService.getNotesByUserSearch(pageNO,pageSize,key);
         return CommonUtil.createBuildResponse(notes,HttpStatus.OK);

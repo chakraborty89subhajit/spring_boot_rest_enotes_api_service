@@ -20,7 +20,7 @@ public class ToDoController implements ToDoControllerEndpoint {
     private ToDoService todoService;
 
     @Override
-    public ResponseEntity<?> saveToDo(@RequestBody ToDoDTO todo) throws Exception{
+    public ResponseEntity<?> saveToDo( ToDoDTO todo) throws Exception{
         Boolean saveToDo = todoService.saveToDo(todo);
         if(saveToDo){
             return CommonUtil.createBuildResponseMessage
@@ -32,7 +32,7 @@ public class ToDoController implements ToDoControllerEndpoint {
     }
 
     @Override
-    public ResponseEntity<?> getToDoById (@PathVariable Integer id) throws Exception{
+    public ResponseEntity<?> getToDoById ( Integer id) throws Exception{
         ToDoDTO todo = todoService.getToDOById(id);
         return CommonUtil.createBuildResponse(todo,HttpStatus.OK);
     }
