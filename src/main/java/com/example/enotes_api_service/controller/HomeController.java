@@ -1,6 +1,7 @@
 package com.example.enotes_api_service.controller;
 
 import com.example.enotes_api_service.dto.PasswordResetRequest;
+import com.example.enotes_api_service.endpoint.HomeControllerEndpoint;
 import com.example.enotes_api_service.service.HomeService;
 import com.example.enotes_api_service.service.UserService;
 import com.example.enotes_api_service.util.CommonUtil;
@@ -12,15 +13,15 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/api/v1/home")
-public class HomeController {
+
+public class HomeController implements HomeControllerEndpoint {
     @Autowired
     private HomeService homeService;
 
     @Autowired
     private UserService userService;
 
-    @GetMapping("/verify")
+    @Override
     public ResponseEntity<?> verifyUserAccount(@RequestParam Integer uid,
                                                @RequestParam String code ) throws Exception{
         Boolean verifyAccount = homeService.verifyAccount(uid,code);
@@ -34,7 +35,7 @@ public class HomeController {
                 HttpStatus.BAD_REQUEST);
     }
 
-    @GetMapping("/send-email-reset")
+ @Override
     public ResponseEntity<?> sendEmailForPasswordreset(@RequestParam String email,
                                                        HttpServletRequest request)throws Exception
     {
@@ -44,7 +45,7 @@ public class HomeController {
                 HttpStatus.OK);
     }
 
-    @GetMapping("/verify-password-link")
+    @Override
     public ResponseEntity<?> verifyPasswordResetLink(@RequestParam Integer uid,
                                                      @RequestParam String code) throws Exception{
         userService.verifyPasswordResetLink(uid,code);
@@ -54,7 +55,7 @@ public class HomeController {
 
     }
 
-    @PostMapping("/reset-password")
+    @Override
     public ResponseEntity<?> resetPassword(@RequestBody PasswordResetRequest
                                                        passwordResetRequest)throws Exception{
 
